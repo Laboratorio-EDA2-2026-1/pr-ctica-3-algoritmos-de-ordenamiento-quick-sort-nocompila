@@ -23,14 +23,17 @@ static inline void intercambiar(int *a, int *b) {
 
 /* Devuelve el promedio (double) de arr[bajo..alto] */
 double calcular_promedio_segmento(int arr[], int bajo, int alto) {
-    long long suma = 0;
-    int n = alto-bajo + 1;
-    for(int i= bajo ; i  <= alto ; ++i){
+    long long suma = 0;                    // evitar overflow
+    int n = alto - bajo + 1;
+    for (int i = bajo; i <= alto; ++i) {
         suma += arr[i];
     }
-    return (double)suma/(double)n;
-}
 
+    double promedio = (double)suma / (double)n;  // promedio como double
+
+    return promedio;  
+    return 0.0;  // placeholder, cumple con la indicación
+}
 /*
   Partición usando pivote = promedio.
   Objetivo:
@@ -52,9 +55,12 @@ int particion_por_promedio(int arr[], int bajo, int alto, double pivote) {
             ++i;
         }
     }
-    return i - 1; 
-}
 
+    int resultado = i - 1;  
+
+    return resultado;  
+    return -1;  // placeholder
+} 
 /*
   QuickSort con pivote = promedio:
     - Caso base: si bajo >= alto, terminar.
