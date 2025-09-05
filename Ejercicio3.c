@@ -97,32 +97,98 @@ int parsear_token(const char *tok, Destino *d) {
  *             una política simple, p. ej., el de menor índice.
  */
 int elegir_destino(const Destino *destinos, int n) {
-    // Escribe aquí tu función
+        int conocidos = 0;
+    int desconocidos = 0;
+    int max_conocido = 0;
 
-    // Sugerencias de variables que podrías usar:
-    // int conocidos = 0, desconocidos = 0;
-    // int indice_elegido = -1;
-    // int max_conocido = ...; // para apoyar la Regla 4 si asignas un valor simbólico
-    // double media = 0.0;
+    // Contar conocidos y desconocidos
+    for (int i = 0; i < n; i++) {
+        if (destinos[i].es_conocido) {
+            conocidos = conocidos + 1;
+            if (destinos[i].costo > max_conocido) {
+                max_conocido = destinos[i].costo;
+            }
+        } else {
+            desconocidos = desconocidos + 1;
+        }
+    }
 
-    // 1) Contar conocidos vs desconocidos
+    //Regla 5
+    if (desconocidos > conocidos) {
+        int k = rand() % desconocidos;
+        int cuenta = 0;
 
-    // 2) Si desconocidos > conocidos:
-    //      - Elegir aleatoriamente entre índices con es_conocido == 0
-    //      - return indice_aleatorio;
+        for (int i = 0; i < n; i++) {
+            if (!destinos[i].es_conocido) {
+                if (cuenta == k) {
+                    return i;
+                } else {
+                    cuenta = cuenta + 1;
+                }
+            }
+        }
 
-    // 3) Calcular "media" según tu diseño
-    //      - p. ej., media de costos conocidos
-    //      - asignar valor representativo a desconocidos respetando Regla 4
+        for (int i = 0; i < n; i++) {
+            if (!destinos[i].es_conocido) {
+                return i;
+            }
+        }
+    }
 
-    // 4) Hallar el índice con distancia mínima a la media
-    //      - manejar empates de forma determinista (p. ej., menor índice)
+    double L = (double)max_conocido + 1.0;
 
-    return -1; // Placeholder: reemplaza por el índice elegido
+    //Promedio
+    double suma_total = 0.0;
+    for (int i = 0; i < n; i++) {
+        if (destinos[i].es_conocido) {
+            suma_total = suma_total + (double)destinos[i].costo;
+        } else {
+            suma_total = suma_total + L;
+        }
+    }
+    double media = suma_total / (double)n;
+
+    // Indice mas cercano al promedio
+    int indice_mejor = 0;
+
+    double v0;
+    if (destinos[0].es_conocido) {
+        v0 = (double)destinos[0].costo;
+    } else {
+        v0 = L;
+    }
+
+    double dif_mejor = v0 - media;
+    if (dif_mejor < 0.0) {
+        dif_mejor = -dif_mejor;
+    }
+
+    for (int i = 1; i < n; i++) {
+        double v;
+
+        if (destinos[i].es_conocido) {
+            v = (double)destinos[i].costo;
+        } else {
+            v = L;
+        }
+
+        double dif = v - media;
+        if (dif < 0.0) {
+            dif = -dif;
+        }
+
+        if (dif < dif_mejor) {
+            dif_mejor = dif;
+            indice_mejor = i;
+        }
+    }
+
+    return indice_mejor;
 }
 
 int main(void) {
     int n;
+    printf("Ingresa el numero de destinos:");
     if (scanf("%d", &n) != 1 || n < 3) {
         fprintf(stderr, "Error: n inválido (debe ser >= 3).\n");
         return 1;
@@ -140,6 +206,7 @@ int main(void) {
     // Leer n tokens
     for (int i = 0; i < n; i++) {
         char tok[64];
+        printf("Ingresa el costo del destino %d: ", i+1);
         if (scanf("%63s", tok) != 1) {
             fprintf(stderr, "Error: no se pudo leer el token %d.\n", i + 1);
             free(destinos);
